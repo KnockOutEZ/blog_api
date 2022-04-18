@@ -3,6 +3,7 @@ package models
 import (
 	"errors"
 	"html"
+	"log"
 	"strings"
 	"time"
 
@@ -60,12 +61,32 @@ func (p *Post) SavePost(db *gorm.DB) (*Post, error) {
 func (p *Post) FindAllPosts(db *gorm.DB) (*[]Post, error) {
 	var err error
 	posts := []Post{}
-	err = db.Debug().Model(&Post{}).Limit(100).Find(&posts).Error
+	err = db.Debug().Model(&Post{}).Find(&posts).Error
 	if err != nil {
 		return &[]Post{}, err
 	}
 	if len(posts) > 0 {
 		for i, _ := range posts {
+			log.Println(posts[i].AuthorID)
+			err := db.Debug().Model(&User{}).Where("id = ?", posts[i].AuthorID).Find(&posts[i].Author).Error
+			if err != nil {
+				return &[]Post{}, err
+			}
+		}
+	}
+	return &posts, nil
+}
+
+func (p *Post) FindAllMyPosts(db *gorm.DB, uid uint32) (*[]Post, error) {
+	var err error
+	posts := []Post{}
+	err = db.Debug().Model(&Post{}).Where("author_id = ?", uid).Limit(100).Find(&posts).Error
+	if err != nil {
+		return &[]Post{}, err
+	}
+	if len(posts) > 0 {
+		for i, _ := range posts {
+			log.Println(posts[i].AuthorID)
 			err := db.Debug().Model(&User{}).Where("id = ?", posts[i].AuthorID).Take(&posts[i].Author).Error
 			if err != nil {
 				return &[]Post{}, err

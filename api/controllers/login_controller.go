@@ -3,6 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log"
 	"net/http"
 
 	"github.com/KnockOutEZ/BlogRestAPI/api/auth"
@@ -54,5 +55,7 @@ func (server *Server) SignIn(email, password string) (string, error) {
 	if err != nil && err == bcrypt.ErrMismatchedHashAndPassword {
 		return "", err
 	}
+
+	log.Println(user)
 	return auth.CreateToken(user.ID)
 }

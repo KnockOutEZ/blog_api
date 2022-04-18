@@ -65,6 +65,18 @@ func (server *Server) GetPosts(w http.ResponseWriter, r *http.Request) {
 	responses.JSON(w, http.StatusOK, posts)
 }
 
+func (server *Server) GetMyPosts(w http.ResponseWriter, r *http.Request) {
+
+	post := models.Post{}
+	uid, err := auth.ExtractTokenID(r)
+	posts, err := post.FindAllMyPosts(server.DB, uid)
+	if err != nil {
+		responses.ERROR(w, http.StatusInternalServerError, err)
+		return
+	}
+	responses.JSON(w, http.StatusOK, posts)
+}
+
 func (server *Server) GetPost(w http.ResponseWriter, r *http.Request) {
 
 	vars := mux.Vars(r)
